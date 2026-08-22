@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>【爆料】微軟又搞事？Java版底層NBT封包外洩漏洞，大量苦主手機密碼在螢幕被爆出來？ -蒼龍電玩資訊站</title>
+    <link rel="icon" type="image/jpeg" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKl42Nq3vLpJ3HCH5Bs1ayzmQyDiUA5B7WeBPyKy3cFg&s=10">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft JhengHei", "PingFang TC", Arial, sans-serif;
+            font-size: 14px;
+            background: #ebebeb;
+            color: #333;
+            line-height: 1.6;
+        }
+        a { color: #0066bb; text-decoration: none; }
+        a:hover { color: #e87722; text-decoration: underline; }
+
+        /* ── HEADER ── */
+        .site-header { background: #1a2744; border-bottom: 3px solid #e87722; }
+        .header-top {
+            max-width: 1200px; margin: 0 auto; padding: 8px 12px;
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        }
+        .logo-area { display: flex; align-items: center; gap: 10px; }
+        .logo-text { color: #fff; font-size: 19px; font-weight: bold; white-space: nowrap; }
+        .logo-text em { color: #e87722; font-style: normal; }
+        .logo-dragon { flex-shrink: 0; }
+        .header-mid { display: flex; align-items: center; gap: 6px; flex: 1; max-width: 340px; }
+        .header-mid input {
+            flex: 1; padding: 5px 10px; border: 1px solid #3a4f7a;
+            background: #243566; color: #ccc; border-radius: 3px; font-size: 12px;
+        }
+        .header-mid input::placeholder { color: #7a90bb; }
+        .header-mid button {
+            padding: 5px 12px; background: #e87722; color: #fff;
+            border: none; border-radius: 3px; cursor: pointer; font-size: 12px; white-space: nowrap;
+        }
+        .header-right { display: flex; align-items: center; gap: 10px; color: #aac0e0; font-size: 12px; white-space: nowrap; }
+        .header-right a { color: #aac0e0; }
+        .notif-badge {
+            background: #e87722; color: #fff; border-radius: 10px;
+            padding: 1px 6px; font-size: 11px;
+        }
+        .avatar-sm {
+            width: 28px; height: 28px; border-radius: 50%; background: #3a5f9a;
+            display: flex; align-items: center; justify-content: center; font-size: 11px; color: #fff;
+        }
+        .main-nav { background: #253260; }
+        .nav-inner { max-width: 1200px; margin: 0 auto; display: flex; }
+        .nav-item {
+            padding: 8px 14px; color: #c8d8f0; font-size: 13px;
+            cursor: pointer; display: block; transition: background 0.15s;
+        }
+        .nav-item:hover, .nav-item.active { background: #e87722; color: #fff; text-decoration: none; }
+
+        /* ── LAYOUT ── */
+        .page-body { max-width: 1200px; margin: 0 auto; padding: 10px 12px; }
+        .breadcrumb { padding: 6px 0 10px; font-size: 12px; color: #777; }
+        .breadcrumb a { color: #0066bb; }
+        .breadcrumb span { margin: 0 4px; color: #bbb; }
+        .content-layout { display: flex; gap: 12px; align-items: flex-start; }
+        .main-col { flex: 1; min-width: 0; }
+        .side-col { width: 218px; flex-shrink: 0; }
+
+        /* ── BOARD HEADER ── */
+        .board-header {
+            background: #fff; border: 1px solid #d5d5d5; border-top: 3px solid #e87722;
+            padding: 10px 14px; margin-bottom: 8px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .board-title { font-size: 16px; font-weight: bold; color: #1a2744; }
+        .board-title em { color: #e87722; font-style: normal; }
+        .board-meta { font-size: 11px; color: #999; margin-top: 2px; }
+        .board-actions { display: flex; gap: 6px; }
+        .btn-sm {
+            padding: 3px 10px; border-radius: 3px; border: 1px solid #d0d0d0;
+            background: #f6f6f6; color: #555; font-size: 11px; cursor: pointer; white-space: nowrap;
+        }
+        .btn-sm:hover { background: #e87722; color: #fff; border-color: #e87722; }
+        .btn-sub { background: #1a2744; color: #fff; border-color: #1a2744; }
+
+        /* ── POST BOX ── */
+        .post-box { background: #fff; border: 1px solid #d5d5d5; margin-bottom: 8px; }
+        .post-titlebar {
+            background: #f5f7fa; border-bottom: 1px solid #e0e4ea;
+            padding: 10px 14px;
+        }
+        .post-tag {
+            display: inline-block; color: #fff; font-size: 11px;
+            padding: 1px 7px; border-radius: 2px; margin-right: 4px;
+        }
+        .tag-orange { background: #e87722; }
+        .tag-red { background: #cc3344; }
+        .post-h1 { font-size: 17px; font-weight: bold; color: #222; line-height: 1.45; margin: 5px 0 6px; }
+        .post-stats { display: flex; gap: 14px; font-size: 11px; color: #999; flex-wrap: wrap; }
+        .post-stats strong { color: #555; }
+
+        /* ── FLOOR LAYOUT ── */
+        .post-floor { display: flex; border-bottom: 1px solid #eee; }
+        .post-floor:last-of-type { border-bottom: none; }
+
+        .floor-user {
+            width: 88px; flex-shrink: 0; padding: 12px 8px; border-right: 1px solid #eee;
+            text-align: center; background: #fafbfd;
+        }
+        .av {
+            width: 48px; height: 48px; border-radius: 50%; margin: 0 auto 5px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; font-weight: bold; color: #fff;
+        }
+        .av-blue   { background: #3a6bcc; }
+        .av-green  { background: #3aaa60; }
+        .av-purple { background: #8844cc; }
+        .av-red    { background: #cc3344; }
+        .av-teal   { background: #2a9999; }
+        .av-orange { background: #e87722; }
+        .av-gray   { background: #777; }
+        .av-pink   { background: #cc4488; }
+        .av-navy   { background: #1a2744; }
+
+        .floor-uname { font-size: 11px; font-weight: bold; color: #1a2744; word-break: break-all; }
+        .floor-stars { font-size: 10px; color: #e87722; margin-top: 2px; }
+        .floor-posts { font-size: 10px; color: #bbb; }
+
+        .floor-content { flex: 1; padding: 12px 16px 10px; min-width: 0; }
+        .floor-num { font-size: 11px; color: #bbb; margin-bottom: 6px; }
+        .floor-num strong { color: #e87722; }
+        .floor-text { font-size: 14px; color: #333; line-height: 1.8; margin-bottom: 10px; }
+        .floor-text p { margin-bottom: 10px; }
+        .floor-text p:last-child { margin-bottom: 0; }
+
+        .alert-inline {
+            background: #fff4e6; border-left: 3px solid #e87722;
+            padding: 10px 14px; border-radius: 0 4px 4px 0;
+            color: #9b4800; font-size: 13px; margin: 12px 0;
+        }
+
+        .floor-footer {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-top: 8px; padding-top: 8px; border-top: 1px solid #f2f2f2;
+        }
+        .floor-ts { font-size: 11px; color: #bbb; }
+        .floor-btns { display: flex; gap: 6px; }
+        .fbtn {
+            font-size: 11px; color: #888; cursor: pointer; padding: 2px 7px;
+            border-radius: 2px; border: 1px solid #e0e0e0; background: #fafafa;
+            transition: all 0.15s; font-family: inherit;
+        }
+        .fbtn:hover { background: #e87722; color: #fff; border-color: #e87722; }
+        .fbtn.like { color: #c04000; border-color: #ffd0aa; background: #fff8f4; }
+        .fbtn.like:hover { background: #e87722; color: #fff; border-color: #e87722; }
+        .fbtn.like.liked { background: #e87722; color: #fff; border-color: #e87722; }
+        .fbtn.like.liked:hover { background: #c85c00; border-color: #c85c00; }
+        .lc { color: #e87722; font-weight: bold; }
+
+        /* ── COMMENTS HEADER ── */
+        .comments-header {
+            background: #f5f7fa; border-top: 1px solid #eee; border-bottom: 2px solid #1a2744;
+            padding: 8px 14px; display: flex; align-items: center; justify-content: space-between;
+        }
+        .ctitle { font-size: 13px; font-weight: bold; color: #1a2744; }
+        .cbadge {
+            background: #e87722; color: #fff; font-size: 11px;
+            padding: 1px 7px; border-radius: 10px; margin-left: 6px;
+        }
+        .csort { font-size: 11px; color: #999; display: flex; gap: 8px; }
+        .csort span { cursor: pointer; }
+        .csort span.active { color: #e87722; font-weight: bold; }
+
+        /* ── PAGINATION ── */
+        .pagination {
+            padding: 8px 14px; background: #f5f7fa; border-top: 1px solid #e4e4e4;
+            display: flex; align-items: center; gap: 4px; font-size: 12px;
+        }
+        .pgbtn {
+            padding: 3px 9px; border: 1px solid #d5d5d5; background: #fff;
+            color: #555; border-radius: 2px; cursor: pointer; font-family: inherit;
+        }
+        .pgbtn.active { background: #1a2744; color: #fff; border-color: #1a2744; }
+        .pgbtn:hover:not(.active) { background: #e87722; color: #fff; border-color: #e87722; }
+
+        /* ── REPLY BOX ── */
+        .reply-wrap { background: #fff; border: 1px solid #d5d5d5; margin-top: 8px; }
+        .reply-head {
+            background: #f5f7fa; padding: 8px 14px; border-bottom: 1px solid #eee;
+            font-size: 13px; font-weight: bold; color: #1a2744;
+        }
+        .reply-body { padding: 12px 14px; }
+        .reply-row { display: flex; align-items: flex-start; gap: 10px; }
+        .reply-ta {
+            flex: 1; height: 70px; padding: 8px 10px; border: 1px solid #ccc;
+            border-radius: 3px; resize: none; font-family: inherit; font-size: 13px;
+            color: #333; line-height: 1.6; transition: border 0.15s;
+        }
+        .reply-ta:focus { outline: none; border-color: #e87722; }
+        .reply-sub-row {
+            margin-top: 8px; display: flex; align-items: center;
+            justify-content: space-between; padding-left: 58px;
+        }
+        .reply-hint { font-size: 11px; color: #bbb; }
+        .btn-submit {
+            padding: 6px 20px; background: #e87722; color: #fff;
+            border: none; border-radius: 3px; cursor: pointer;
+            font-size: 13px; font-weight: bold; font-family: inherit;
+        }
+        .btn-submit:hover { background: #c85c00; }
+
+        /* ── SIDEBAR ── */
+        .sb-box { background: #fff; border: 1px solid #d5d5d5; margin-bottom: 10px; }
+        .sb-title { background: #1a2744; color: #fff; padding: 7px 12px; font-size: 13px; font-weight: bold; }
+        .sb-body { padding: 8px 12px; }
+        .sb-item { border-bottom: 1px solid #f0f0f0; padding: 6px 0; font-size: 12px; }
+        .sb-item:last-child { border-bottom: none; }
+        .sb-item a { color: #333; display: block; line-height: 1.4; }
+        .sb-item a:hover { color: #e87722; text-decoration: none; }
+        .hot-n {
+            display: inline-block; width: 18px; height: 18px; border-radius: 2px;
+            text-align: center; line-height: 18px; font-size: 10px;
+            color: #fff; margin-right: 5px; vertical-align: middle; background: #bbb;
+        }
+        .h1 { background: #e83030; }
+        .h2 { background: #e86030; }
+        .h3 { background: #e87722; }
+        .ad-box {
+            background: #f5f5f5; border: 1px dashed #ccc;
+            text-align: center; color: #bbb; font-size: 11px; padding: 28px 10px;
+        }
+
+        /* ── FOOTER ── */
+        .site-footer {
+            background: #1a2744; color: #7a90b8; font-size: 11px;
+            text-align: center; padding: 14px; margin-top: 20px;
+            border-top: 2px solid #e87722;
+        }
+        .site-footer a { color: #7a90b8; }
+        .site-footer a:hover { color: #e87722; }
+        .site-footer p + p { margin-top: 4px; color: #4d6088; }
+
+        /* ── MOBILE ── */
+        @media (max-width: 768px) {
+            .header-mid { display: none; }
+            .header-right { font-size: 11px; gap: 6px; }
+            .nav-item { padding: 7px 9px; font-size: 12px; }
+            .page-body { padding: 6px; }
+            .content-layout { flex-direction: column; }
+            .side-col { width: 100%; }
+            .board-header { flex-direction: column; gap: 8px; align-items: flex-start; }
+            .board-actions { flex-wrap: wrap; }
+            .post-h1 { font-size: 15px; }
+            .floor-user { width: 64px; padding: 10px 5px; }
+            .av { width: 36px; height: 36px; font-size: 14px; }
+            .floor-content { padding: 10px 10px 8px; }
+            .floor-text { font-size: 13px; }
+            .floor-footer { flex-direction: column; align-items: flex-start; gap: 4px; }
+            .floor-btns { flex-wrap: wrap; }
+            .reply-sub-row { padding-left: 0; flex-direction: column; align-items: flex-end; gap: 6px; }
+            .post-stats { gap: 8px; font-size: 10px; }
+            .sb-box { margin-bottom: 8px; }
+        }
+        @media (max-width: 480px) {
+            .logo-text { font-size: 15px; }
+            .nav-inner { overflow-x: auto; flex-wrap: nowrap; }
+            .nav-item { white-space: nowrap; padding: 7px 8px; font-size: 11px; }
+            .post-h1 { font-size: 14px; }
+            .floor-user { width: 54px; }
+            .av { width: 32px; height: 32px; }
+        }
+
+        /* ── GUEST AVATAR ── */
+        .av-guest {
+            background: #b8b8b8;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23b8b8b8'/%3E%3Ccircle cx='50' cy='36' r='22' fill='%23e0e0e0'/%3E%3Cellipse cx='50' cy='96' rx='38' ry='30' fill='%23e0e0e0'/%3E%3C/svg%3E");
+            background-size: cover;
+            font-size: 0 !important;
+        }
+
+        /* ── ANIMATION ── */
+        .comment-new { animation: slidein 0.3s ease; }
+        @keyframes slidein {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+    <div class="header-top">
+        <div class="logo-area">
+            <img class="logo-dragon" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKl42Nq3vLpJ3HCH5Bs1ayzmQyDiUA5B7WeBPyKy3cFg&s=10" width="38" height="38" style="border-radius:4px;object-fit:cover;" alt="蒼龍">
+            <div class="logo-text">蒼龍 <em>電玩資訊站</em></div>
+        </div>
+        <div class="header-mid">
+            <input type="text" placeholder="搜尋文章、板名、遊戲...">
+            <button>搜尋</button>
+        </div>
+        <div class="header-right">
+            <div class="avatar-sm">訪</div>
+            <a href="#">訪客登入</a>
+            <span>|</span>
+            <a href="#">註冊</a>
+            <span class="notif-badge">3</span>
+        </div>
+    </div>
+    <nav class="main-nav">
+        <div class="nav-inner">
+            <a class="nav-item" href="#">首頁</a>
+            <a class="nav-item" href="#">GNN</a>
+            <a class="nav-item active" href="#">討論板</a>
+            <a class="nav-item" href="#">動漫</a>
+            <a class="nav-item" href="#">遊戲</a>
+            <a class="nav-item" href="#">電影</a>
+            <a class="nav-item" href="#">創作</a>
+            <a class="nav-item" href="#">基地</a>
+            <a class="nav-item" href="#">問答</a>
+        </div>
+    </nav>
+</header>
+
+<!-- PAGE BODY -->
+<div class="page-body">
+    <div class="breadcrumb">
+        <a href="#">首頁</a><span>›</span>
+        <a href="#">討論板</a><span>›</span>
+        <a href="#">Minecraft 討論板</a><span>›</span>
+        <span style="color:#555;">文章</span>
+    </div>
+
+    <div class="content-layout">
+        <!-- MAIN -->
+        <div class="main-col">
+
+            <div class="board-header">
+                <div>
+                    <div class="board-title">🎮 Minecraft <em>討論板</em></div>
+                    <div class="board-meta">訂閱人數：48,821　在線：1,204 人</div>
+                </div>
+                <div class="board-actions">
+                    <button class="btn-sm" id="sub-btn" onclick="toggleSub()">＋ 訂閱</button>
+                    <button class="btn-sm">發表文章</button>
+                    <button class="btn-sm">板規</button>
+                </div>
+            </div>
+
+            <div class="post-box">
+                <!-- Title bar -->
+                <div class="post-titlebar">
+                    <div>
+                        <span class="post-tag tag-orange">爆料</span>
+                        <span class="post-tag tag-red">緊急</span>
+                    </div>
+                    <div class="post-h1">微軟又搞事？Java版底層NBT封包外洩漏洞，大量苦主手機密碼在螢幕被爆出來？</div>
+                    <div class="post-stats">
+                        <span>👁 閱覽 <strong>21,447</strong></span>
+                        <span>💬 回覆 <strong id="total-count">40</strong></span>
+                        <span>📌 精華</span>
+                        <span>🔗 分享</span>
+                    </div>
+                </div>
+
+                <!-- OP -->
+                <div class="post-floor">
+                    <div class="floor-user">
+                        <div class="av" style="background-image:url('https://i.pinimg.com/236x/d0/9d/26/d09d2648db99f46d197bfc4dbc265a95.jpg');background-size:cover;background-position:center;"></div>
+                        <div class="floor-uname">CodeCracker_TW</div>
+                        <div class="floor-stars">★★★☆☆</div>
+                        <div class="floor-posts">文章：1,203</div>
+                    </div>
+                    <div class="floor-content">
+                        <div class="floor-num">樓主　<strong>B0</strong></div>
+                        <div class="floor-text">
+                            <p>大家昨晚開服有遇到怪事嗎？今天國外 Discord 圈直接炸開了，微軟 Java 版最新版本的底層 NBT 封包協議出現嚴重的溢位漏洞，導致本地快取資料可以直接被伺服器連線的 Raw Text 渲染機制強行抓取！</p>
+                            <p>簡單來說，只要有新玩家進服觸發核心驗證，遊戲底層的 Bug 就會隨機把區網內其他玩家的「手機綁定個資」或「解鎖密碼前四碼」，直接用滿版彩色大字或推屏的方式，強行噴在全服所有人的螢幕中央！</p>
+                            <div class="alert-inline">📢 重大澄清：這完全不是你們自己開服的主機中毒或被駭，後台 100% 是乾淨安全的！這純粹是微軟官方原生代碼大翻車的技術缺陷，大家不要再怪開服的朋友了！</div>
+                            <p>目前官方還沒給出修正檔，聽說很多玩家在遊戲裡看到自己手機密碼跳出來，還以為遇到境外詐騙集團，當場嚇到拔線。下面有一堆剛剛回報的最新苦主，大家自己注意一下。</p>
+                        </div>
+                        <div class="floor-footer">
+                            <span class="floor-ts">2026-08-21 10:22:14</span>
+                            <div class="floor-btns">
+                                <button class="fbtn like">👍 <span class="lc">847</span></button>
+                                <button class="fbtn">💬 引用</button>
+                                <button class="fbtn">🚨 檢舉</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comments section header -->
+                <div class="comments-header">
+                    <div style="display:flex;align-items:center;">
+                        <span class="ctitle">全部回覆</span>
+                        <span class="cbadge" id="reply-badge">40</span>
+                    </div>
+                    <div class="csort">
+                        <span class="active">最新</span>
+                        <span>最舊</span>
+                        <span>最讚</span>
+                    </div>
+                </div>
+
+                <!-- Comments -->
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0B_DHcvZbA3cYcK-SRfwG1teBkH88ImHZK69QMzDSsg&s=10');background-size:cover;background-position:center;"></div><div class="floor-uname">Gamer_AmdYes</div><div class="floor-stars">★★★☆☆</div><div class="floor-posts">文章：892</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B1</strong></div>
+                        <div class="floor-text">笑死，昨晚不只原PO，我跟朋友開新服在玩創造，結果聊天欄跟螢幕正中央突然跳出境外勒索金錢。更毛的是，下一秒直接跳出我妹的名字跟我手機解鎖密碼前四碼，嚇到我以為遇到鬼，直接把筆電電源線拔掉，哭啊！原來是微軟的鍋，那今晚可以回去繼續玩了。</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 10:35:11</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">312</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTEQHEGKQqQ9T6XzWJPohqHwHdhXQZJafm5EY8adP4Y9w&s');background-size:cover;background-position:center;"></div><div class="floor-uname">Mining_Crazy99</div><div class="floor-stars">★★★★☆</div><div class="floor-posts">文章：2,381</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B2</strong></div>
+                        <div class="floor-text">樓上我不孤單！昨晚我們服也中招，螢幕中央突然炸出一整面七彩的台式國罵，罵超髒。然後我的角色突然毫無預警「暴風變大 3 倍」塞滿整個螢幕，視角變得超高，地上的方塊像小人國一樣。我還以為主機中毒在群組發飆，原來是官方 NBT 機制鬼畜喔？</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 10:52:00</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">198</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-guest"></div><div class="floor-uname">訪客玩家</div><div class="floor-stars">★☆☆☆☆</div><div class="floor-posts">文章：14</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B3</strong></div>
+                        <div class="floor-text">我不敢再玩賣快了</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 10:58:14</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">24</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR95KF4JPS-xKWpIDby-ZDrIv9vxobsW0lbdN4a_J6FyA&s=10');background-size:cover;background-position:center;"></div><div class="floor-uname">TNT_Master_TW</div><div class="floor-stars">★★★☆☆</div><div class="floor-posts">文章：1,054</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B4</strong></div>
+                        <div class="floor-text">幹真的！昨天新進一個朋友的伺服器，屁股都還沒坐熱，全螢幕突然被血紅色的「有新人來了，棺材買好了」大字貼臉。大家都把我當成帶病毒進服的國際駭客狂噴，差點被排擠。感謝這篇分析文幫我洗刷冤屈，微軟真的大出包！</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 11:11:15</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">275</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-pink">T</div><div class="floor-uname">Tina0103</div><div class="floor-stars">★★☆☆☆</div><div class="floor-posts">文章：388</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B5</strong></div>
+                        <div class="floor-text">這筆恐怖遊戲還恐怖ㄟ</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 11:12:26</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">66</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-teal">A</div><div class="floor-uname">aro.2365.23</div><div class="floor-stars">★★☆☆☆</div><div class="floor-posts">文章：227</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B6</strong></div>
+                        <div class="floor-text">真的很恐怖ㄟ!各位&gt;</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 11:18:45</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">31</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-navy">卡</div><div class="floor-uname">卡位等Hotfix</div><div class="floor-stars">★★★☆☆</div><div class="floor-posts">文章：741</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B7</strong></div>
+                        <div class="floor-text">卡</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 11:25:30</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">48</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdWeNrOQINFxu2HaY8mQWli0BkJsXcBR4_gy_hlFG7uQ&s=10');background-size:cover;background-position:center;"></div><div class="floor-uname">Steve_No_Bug</div><div class="floor-stars">★★★★☆</div><div class="floor-posts">文章：3,102</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B8</strong></div>
+                        <div class="floor-text">我們服昨天也是，聊天欄卡一堆紅字，連我前天剛換的手機密碼前四碼都刷得出來，全伺服器的人都看得到。我嚇到直接去改微軟帳密。微軟這波到底有沒有要修啊？資安直接洩光光。</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 11:42:03</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">189</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRK-PGBPZmE3Z81KHZwImIoca3tQUHoz9eZSXmayBhaHA&s');background-size:cover;background-position:center;"></div><div class="floor-uname">隨機受害者_VIP</div><div class="floor-stars">★★★☆☆</div><div class="floor-posts">文章：596</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B9</strong></div>
+                        <div class="floor-text">最恐怖的是它還會抓語音快取，我們在創造模式飛到一半，螢幕中央一直瘋狂跳紅色大字，聽到我們在Discord語音講什麼，遊戲裡就立刻出現紅字秒回我們！後來還一直瘋狂刷「我愛你」之類的告白大字，搞得全服大破防集體斷線，真的超毛！</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 12:05:55</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">221</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-teal">E</div><div class="floor-uname">Eason</div><div class="floor-stars">★★☆☆☆</div><div class="floor-posts">文章：134</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B10</strong></div>
+                        <div class="floor-text">等待官方回復把</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 12:12:34</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">19</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-green">R</div><div class="floor-uname">Reall-4858</div><div class="floor-stars">★★★★★</div><div class="floor-posts">文章：5,447</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B11</strong></div>
+                        <div class="floor-text">去看了一下官方 Jira 的回報單，這好像是 Raw Text 渲染緩衝區在特定多線程同步時會被劫持的嚴重 Bug。反正大家放心，開服的主機本身是 100% 乾淨的，純粹是原版客戶端的安全性缺陷。現在只能等微軟官方發緊急 Hotfix 了。</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 12:36:27</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">304</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTIBCVGh2G4BPdHfQ9bIGAELHSAnuVJGa6fx9xq1eR_AA&s=10');background-size:cover;background-position:center;"></div><div class="floor-uname">雞排要切不要辣</div><div class="floor-stars">★★★☆☆</div><div class="floor-posts">文章：877</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B12</strong></div>
+                        <div class="floor-text">朝盛，微軟這到底什麼破技術，還我個資</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 12:55:18</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">77</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTecn-LYt_gkiateulvFAf6D-_EdsBTXEGZRG4OqkFE-w&s=10');background-size:cover;background-position:center;"></div><div class="floor-uname">星爆氣流斬</div><div class="floor-stars">★★★☆☆</div><div class="floor-posts">文章：1,609</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B13</strong></div>
+                        <div class="floor-text">笑死 刷我愛你是三小 駭客也太調皮</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 13:14:02</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">143</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-teal">專</div><div class="floor-uname">專業可樂手</div><div class="floor-stars">★★☆☆☆</div><div class="floor-posts">文章：203</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B14</strong></div>
+                        <div class="floor-text">+1</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 13:42:55</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">8</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-pink">可</div><div class="floor-uname">可憐的小波利</div><div class="floor-stars">★★★☆☆</div><div class="floor-posts">文章：512</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B15</strong></div>
+                        <div class="floor-text">完蛋，那我今天晚上到底能不能開服啊？朋友都在等，但我怕被偷看密碼欸</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 14:10:22</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">35</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfXDpfDzq-hBgnpsasWlTsbsRbOmTkH-ftGTkpWeo2gw&s=10');background-size:cover;background-position:center;"></div><div class="floor-uname">終極地底人</div><div class="floor-stars">★★★★☆</div><div class="floor-posts">文章：2,015</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B16</strong></div>
+                        <div class="floor-text">樓上主機安全就開啊，內文不是說伺服器 100% 乾淨，反正大字卡在臉上重登就好了啦，怕屁。</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 14:22:19</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">91</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-blue">X</div><div class="floor-uname">Xx_MinecraftGod_xX</div><div class="floor-stars">★★★☆☆</div><div class="floor-posts">文章：728</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B17</strong></div>
+                        <div class="floor-text">wtf this exploit is crazy, my friend's screen got full of red texts too lol</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 14:35:10</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">44</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-pink">只</div><div class="floor-uname">只愛小戴</div><div class="floor-stars">★☆☆☆☆</div><div class="floor-posts">文章：73</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B18</strong></div>
+                        <div class="floor-text">怕爆</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 14:42:01</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">12</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-green">A</div><div class="floor-uname">alex_gaming</div><div class="floor-stars">★★★☆☆</div><div class="floor-posts">文章：445</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B19</strong></div>
+                        <div class="floor-text">Wait, so is it safe to play on public servers now? Or should I wait?</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 14:55:12</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">22</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-gray">我</div><div class="floor-uname">我就爛</div><div class="floor-stars">★★★☆☆</div><div class="floor-posts">文章：1,147</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B20</strong></div>
+                        <div class="floor-text">還好我都玩單人模式 邊緣人拯救資安 笑死</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 15:10:44</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">267</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-orange">N</div><div class="floor-uname">Notch_TrueFan</div><div class="floor-stars">★★★★☆</div><div class="floor-posts">文章：1,823</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B21</strong></div>
+                        <div class="floor-text">Microsoft ruining the game again smh... typical raw text packet overflow.</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 15:22:18</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">58</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-red">可</div><div class="floor-uname">可樂加曼陀珠</div><div class="floor-stars">★★☆☆☆</div><div class="floor-posts">文章：309</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B22</strong></div>
+                        <div class="floor-text">大字刷我愛你真的會笑死 什麼鬼啦</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 15:35:00</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">88</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-blue">R</div><div class="floor-uname">RedstonePro</div><div class="floor-stars">★★★★☆</div><div class="floor-posts">文章：2,560</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B23</strong></div>
+                        <div class="floor-text">Checked the bug tracker, looks like it affects version 1.21.x mainly. Be careful guys.</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 15:48:12</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">114</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-teal">油</div><div class="floor-uname">油條不要加蛋</div><div class="floor-stars">★★★☆☆</div><div class="floor-posts">文章：991</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B24</strong></div>
+                        <div class="floor-text">卡一個看微軟什麼時候要發公告</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 16:02:55</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">41</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-0HnkZnoeoCq2RhzZmByGQ8Jehr55XKqmTcdGgUt5LA&s=10');background-size:cover;background-position:center;"></div><div class="floor-uname">Herobrine_Is_Real</div><div class="floor-stars">★★★☆☆</div><div class="floor-posts">文章：632</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B25</strong></div>
+                        <div class="floor-text">It's not a bug, it's Herobrine catching you guys hacking lmao</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 16:15:30</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">156</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-gray">老</div><div class="floor-uname">老司機開車</div><div class="floor-stars">★★★☆☆</div><div class="floor-posts">文章：1,432</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B26</strong></div>
+                        <div class="floor-text">哭啊 昨晚我被嚇到直接拔線 沒想到大家都在吵這個</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 16:25:40</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">39</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-blue">彩</div><div class="floor-uname">彩虹苦主</div><div class="floor-stars">★★★☆☆</div><div class="floor-posts">文章：654</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B27</strong></div>
+                        <div class="floor-text">我昨晚剛換新密碼，隔天就在伺服器螢幕上看到前四碼，當場腿軟。微軟你敢不敢給個說法</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 16:38:22</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">203</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-green">D</div><div class="floor-uname">DiamondPickaxe</div><div class="floor-stars">★★★★☆</div><div class="floor-posts">文章：1,788</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B28</strong></div>
+                        <div class="floor-text">This is definitely a client-side memory leak being exploited through the NBT deserialization path. I reported something similar on the bug tracker 3 months ago and they marked it "low priority." Great job Microsoft 👍</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 16:44:09</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">317</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-red">路</div><div class="floor-uname">路過喝水</div><div class="floor-stars">★☆☆☆☆</div><div class="floor-posts">文章：32</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B29</strong></div>
+                        <div class="floor-text">那我朋友叫我趕快去他服上線是在坑我嗎</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 16:51:47</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">88</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-purple">逆</div><div class="floor-uname">逆風魔法師</div><div class="floor-stars">★★★☆☆</div><div class="floor-posts">文章：1,102</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B30</strong></div>
+                        <div class="floor-text">b28推！Mojang根本就知道這個洞，之前MCSF上有人貼過PoC，但官方一直說「無法復現」然後關票。這次炸掉了吧，自己種的因</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 17:02:55</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">241</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-teal">薯</div><div class="floor-uname">薯條配可樂</div><div class="floor-stars">★★☆☆☆</div><div class="floor-posts">文章：276</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B31</strong></div>
+                        <div class="floor-text">等等，這漏洞只有 Java 版嗎？我都玩基岩版可以不用擔心？</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 17:14:10</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">54</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-navy">終</div><div class="floor-uname">終極地底人</div><div class="floor-stars">★★★★☆</div><div class="floor-posts">文章：2,016</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B32</strong></div>
+                        <div class="floor-text">b31 對，目前只有 Java 版確認，基岩版架構不同沒這條路徑，安啦</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 17:18:33</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">97</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-orange">炸</div><div class="floor-uname">炸雞腿飯加蛋</div><div class="floor-stars">★★★☆☆</div><div class="floor-posts">文章：839</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B33</strong></div>
+                        <div class="floor-text">昨晚整個服的人看到我密碼前四碼是 0000 然後被笑死，當下只想拔網路線離開地球</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 17:29:44</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">562</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-pink">月</div><div class="floor-uname">月光下的貓</div><div class="floor-stars">★★★☆☆</div><div class="floor-posts">文章：490</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B34</strong></div>
+                        <div class="floor-text">b33 哭死哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 17:31:02</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">188</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-gray">C</div><div class="floor-uname">CreeperSurvivor</div><div class="floor-stars">★★★★☆</div><div class="floor-posts">文章：2,233</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B35</strong></div>
+                        <div class="floor-text">Just rolled back to 1.20.4 until there's an official patch. Not gonna risk it. Anyone know if Fabric/Forge modded installs are also affected or only vanilla?</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 17:45:19</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">129</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-blue">鑽</div><div class="floor-uname">鑽石礦工不挖煤</div><div class="floor-stars">★★★☆☆</div><div class="floor-posts">文章：713</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B36</strong></div>
+                        <div class="floor-text">認真問一下，如果我是開服主，這個漏洞我需要做什麼緊急措施嗎？還是只能關服等 Hotfix？</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 17:58:37</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">74</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-green">R</div><div class="floor-uname">Reall-4858</div><div class="floor-stars">★★★★★</div><div class="floor-posts">文章：5,449</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B37</strong></div>
+                        <div class="floor-text">b36 目前最穩的做法是關掉 Raw Text 顯示功能（server.properties 裡把 enable-command-block 關掉只是第一步），或是直接暫停開服。插件服的話可以裝 ProtocolLib 暫時過濾掉問題封包，但這只是治標。等官方 patch 才是正解</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 18:10:04</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">388</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-red">憤</div><div class="floor-uname">憤怒的玩家代表</div><div class="floor-stars">★★★☆☆</div><div class="floor-posts">文章：921</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B38</strong></div>
+                        <div class="floor-text">微軟買了 Mojang 之後就一直出包，當初就不應該賣的。Notch 你看看你的孩子變成什麼樣了</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 18:22:51</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">476</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-teal">無</div><div class="floor-uname">無聊滑手機中</div><div class="floor-stars">★☆☆☆☆</div><div class="floor-posts">文章：57</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B39</strong></div>
+                        <div class="floor-text">我看到這篇馬上叫我媽改密碼 她不知道發生什麼事一直問我 我也解釋不清楚</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 18:35:17</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">144</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div class="post-floor">
+                    <div class="floor-user"><div class="av av-purple">伺</div><div class="floor-uname">伺服器管理員哭哭</div><div class="floor-stars">★★★★☆</div><div class="floor-posts">文章：1,355</div></div>
+                    <div class="floor-content">
+                        <div class="floor-num"><strong>B40</strong></div>
+                        <div class="floor-text">我管的幾個伺服器昨晚全被玩家截圖傳群組，現在被大家當笑話看，管理員心好累。先關服了，等 Hotfix 再說，各位苦主保重</div>
+                        <div class="floor-footer"><span class="floor-ts">2026-08-21 18:47:30</span><div class="floor-btns"><button class="fbtn like">👍 <span class="lc">299</span></button><button class="fbtn">💬 引用</button><button class="fbtn">🚨 檢舉</button></div></div>
+                    </div>
+                </div>
+
+                <div id="dynamic-comments"></div>
+
+                <div class="pagination">
+                    <span style="color:#aaa;font-size:12px;margin-right:6px;">頁次：</span>
+                    <button class="pgbtn active">1</button>
+                    <button class="pgbtn">2</button>
+                    <button class="pgbtn">3</button>
+                    <span style="color:#ccc;margin:0 2px;">…</span>
+                    <button class="pgbtn">»</button>
+                </div>
+            </div>
+
+            <!-- Reply box -->
+            <div class="reply-wrap">
+                <div class="reply-head">發表快速回覆</div>
+                <div class="reply-body">
+                    <div class="reply-row">
+                        <div class="av av-guest" style="width:40px;height:40px;flex-shrink:0;margin-top:2px;"></div>
+                        <textarea class="reply-ta" id="reply-text" placeholder="輸入回覆內容..."></textarea>
+                    </div>
+                    <div class="reply-sub-row">
+                        <span class="reply-hint">按下送出即表示同意巴哈姆特使用條款</span>
+                        <button class="btn-submit" onclick="addComment()">送出留言</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="side-col">
+            <div class="sb-box">
+                <div class="sb-title">🔥 本板熱門文章</div>
+                <div class="sb-body">
+                    <div class="sb-item"><a href="#"><span class="hot-n h1">1</span>【問題】1.21.4 鐵路系統建好之後坐車一直出界？</a></div>
+                    <div class="sb-item"><a href="#"><span class="hot-n h2">2</span>分享 800小時生存世界終於建完古典城市！</a></div>
+                    <div class="sb-item"><a href="#"><span class="hot-n h3">3</span>【爆料】微軟又搞事？Java版底層NBT封包外洩...</a></div>
+                    <div class="sb-item"><a href="#"><span class="hot-n">4</span>有沒有人推薦適合多人的生存模組包？</a></div>
+                    <div class="sb-item"><a href="#"><span class="hot-n">5</span>【心得】終於在SMP生存完成末影龍擊殺</a></div>
+                </div>
+            </div>
+
+            <div class="sb-box">
+                <div class="sb-title">📋 最新文章</div>
+                <div class="sb-body">
+                    <div class="sb-item"><a href="#">【問題】地獄要塞刷怪速度好慢怎辦</a></div>
+                    <div class="sb-item"><a href="#">【分享】我的超生存伺服器招人！</a></div>
+                    <div class="sb-item"><a href="#">【討論】Java版 vs 基岩版你選哪個</a></div>
+                    <div class="sb-item"><a href="#">模組推薦 Create Mod 入門教學</a></div>
+                    <div class="sb-item"><a href="#">【問題】1.21 新村莊生成有問題嗎</a></div>
+                </div>
+            </div>
+
+            <div class="ad-box">廣告</div>
+
+            <div class="sb-box" style="margin-top:10px;">
+                <div class="sb-title">🎮 相關討論板</div>
+                <div class="sb-body">
+                    <div class="sb-item"><a href="#">Roblox 討論板</a></div>
+                    <div class="sb-item"><a href="#">Terraria 討論板</a></div>
+                    <div class="sb-item"><a href="#">Stardew Valley 討論板</a></div>
+                    <div class="sb-item"><a href="#">創世神MOD討論板</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+    <p>蒼龍電玩資訊站 © 1996-2026　<a href="#">使用條款</a>　<a href="#">隱私政策</a>　<a href="#">聯絡我們</a>　<a href="#">廣告合作</a></p>
+    <p>本站使用 Cookie 改善使用體驗，繼續瀏覽即表示您同意本站的 Cookie 政策。</p>
+</footer>
+
+<script>
+    // 把剩餘字母頭像換成多種風格混搭自動生成圖
+    const avStyles = ['avataaars', 'bottts', 'lorelei', 'adventurer', 'fun-emoji', 'micah', 'personas', 'croodles'];
+    const avBg = 'backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf,e8e8e8,c7f2d0';
+    document.querySelectorAll('.floor-user').forEach(function(userDiv, i) {
+        const av = userDiv.querySelector('.av');
+        if (!av) return;
+        if (av.classList.contains('av-guest')) return;
+        if (av.style.backgroundImage) return;
+        const nameEl = userDiv.querySelector('.floor-uname');
+        const seed = nameEl ? encodeURIComponent(nameEl.textContent.trim()) : 'user';
+        const style = avStyles[i % avStyles.length];
+        av.style.backgroundImage = "url('https://api.dicebear.com/9.x/" + style + "/svg?seed=" + seed + "&" + avBg + "')";
+        av.style.backgroundSize = 'cover';
+        av.style.backgroundPosition = 'center';
+        av.textContent = '';
+    });
+
+    let commentCount = 41;
+
+    // 訂閱切換
+    let subscribed = false;
+    function toggleSub() {
+        subscribed = !subscribed;
+        const btn = document.getElementById('sub-btn');
+        if (subscribed) {
+            btn.textContent = '✔ 已訂閱';
+            btn.style.background = '#1a2744';
+            btn.style.color = '#fff';
+            btn.style.borderColor = '#1a2744';
+        } else {
+            btn.textContent = '＋ 訂閱';
+            btn.style.background = '';
+            btn.style.color = '';
+            btn.style.borderColor = '';
+        }
+    }
+
+    // 按讚切換（事件委派）
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.fbtn.like');
+        if (!btn) return;
+        const span = btn.querySelector('.lc');
+        const base = parseInt(btn.dataset.base ?? span.textContent);
+        if (!btn.dataset.base) btn.dataset.base = base;
+        if (btn.classList.contains('liked')) {
+            btn.classList.remove('liked');
+            span.textContent = base;
+        } else {
+            btn.classList.add('liked');
+            span.textContent = base + 1;
+        }
+    });
+    const avColors = ['av-blue','av-green','av-purple','av-red','av-teal','av-orange','av-gray','av-pink','av-navy'];
+
+    function addComment() {
+        const text = document.getElementById('reply-text').value.trim();
+        if (!text) { alert('請輸入留言內容！'); return; }
+
+        const now = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        const ts = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+        const color = avColors[Math.floor(Math.random() * avColors.length)];
+        const uid = Math.floor(1000 + Math.random() * 9000);
+        const ch = [...text][0] || '訪';
+        const safe = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+        const el = document.createElement('div');
+        el.className = 'post-floor comment-new';
+        el.innerHTML = `
+            <div class="floor-user">
+                <div class="av av-guest"></div>
+                <div class="floor-uname">訪客玩家_${uid}</div>
+                <div class="floor-stars">★☆☆☆☆</div>
+                <div class="floor-posts">文章：1</div>
+            </div>
+            <div class="floor-content">
+                <div class="floor-num"><strong>B${commentCount}</strong></div>
+                <div class="floor-text">${safe}</div>
+                <div class="floor-footer">
+                    <span class="floor-ts">${ts}</span>
+                    <div class="floor-btns">
+                        <button class="fbtn like">👍 <span class="lc">0</span></button>
+                        <button class="fbtn">💬 引用</button>
+                        <button class="fbtn">🚨 檢舉</button>
+                    </div>
+                </div>
+            </div>`;
+
+        document.getElementById('dynamic-comments').appendChild(el);
+        document.getElementById('reply-text').value = '';
+        document.getElementById('reply-badge').textContent = commentCount;
+        document.getElementById('total-count').textContent = commentCount;
+        commentCount++;
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+</script>
+
+</body>
+</html>
